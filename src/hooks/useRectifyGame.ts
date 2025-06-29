@@ -59,6 +59,9 @@ export const useRectifyGame = () => {
   const nextRound = async () => {
     if (!selectedCurve) return;
     
+    // REVISED: The round score is now S - ΣL
+    const roundScore = actualLength - approximatedLength;
+
     // Save data for the completed round
     const roundData: RoundData = {
         roundNumber: round,
@@ -66,14 +69,16 @@ export const useRectifyGame = () => {
         placedPoints,
         approximatedLength,
         actualLength,
-        score: approximatedLength - actualLength
+        // REVISED: Store the new score
+        score: roundScore
     };
     
     if (gameSession) {
         await saveGameData(round, roundData);
     }
 
-    setTotalScore(prev => prev + (approximatedLength - actualLength));
+    // REVISED: Update total score with the new scoring logic
+    setTotalScore(prev => prev + roundScore);
 
     if (round < TOTAL_ROUNDS) {
       setRound(prev => prev + 1);
@@ -81,7 +86,8 @@ export const useRectifyGame = () => {
     } else {
       setIsGameOver(true);
       if (gameSession){
-          await saveGameData(TOTAL_ROUNDS + 1, { finalScore: totalScore + (approximatedLength - actualLength) });
+          // REVISED: Calculate final score correctly
+          await saveGameData(TOTAL_ROUNDS + 1, { finalScore: totalScore + roundScore });
       }
     }
   };

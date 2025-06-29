@@ -85,11 +85,12 @@ const CurveCanvas: React.FC<CurveCanvasProps> = ({ curve, placedPoints, onPlaceP
         curve.func(curve.t_min),
         ...placedPoints,
         curve.func(curve.t_max)
-    ].sort((a,b) => a.x - b.x);
+    ];
+
 
     // Draw lines
     ctx.beginPath();
-    ctx.strokeStyle = '#10B981';
+    ctx.strokeStyle = '#10B981'; // Green for the path lines
     ctx.lineWidth = 3;
     const firstSegPoint = allPoints[0];
     ctx.moveTo(firstSegPoint.x * scaleFactor.x + offset.x, -firstSegPoint.y * scaleFactor.y + offset.y);
@@ -99,11 +100,13 @@ const CurveCanvas: React.FC<CurveCanvasProps> = ({ curve, placedPoints, onPlaceP
     ctx.stroke();
 
     // Draw points
-    allPoints.forEach((p, index) => {
+    // REVISED: Removed the unused 'index' parameter to fix the VS Code problem.
+    allPoints.forEach((p) => {
         ctx.beginPath();
         ctx.arc(p.x * scaleFactor.x + offset.x, -p.y * scaleFactor.y + offset.y, 6, 0, 2 * Math.PI);
-        const isEndpoint = (index === 0 || index === allPoints.length - 1);
-        ctx.fillStyle = isEndpoint ? '#ef4444' : '#059669';
+        // User-placed points are green, start/end points are red
+        const isUserPlaced = placedPoints.some(pp => pp.x === p.x && pp.y === p.y);
+        ctx.fillStyle = isUserPlaced ? '#059669' : '#ef4444'; // Green for user points, Red for endpoints
         ctx.fill();
     });
 
