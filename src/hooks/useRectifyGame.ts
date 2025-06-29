@@ -17,12 +17,11 @@ export const useRectifyGame = () => {
   const [isRoundFinished, setIsRoundFinished] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [gameSession, setGameSession] = useState<any>(null);
 
   useEffect(() => {
     const initSession = async () => {
-        const session = await initGameSession('rectify');
+        const session = await initGameSession();
         setGameSession(session);
     };
     initSession();
@@ -118,6 +117,8 @@ export const useRectifyGame = () => {
       setTotalScore(0);
       setIsRoundFinished(false);
       setIsGameOver(false);
+      // Re-initialize the session for the new game
+      initGameSession().then(session => setGameSession(session));
   };
 
   return {
