@@ -11,8 +11,8 @@ This project was created with React, TypeScript, and Vite.
 1.  **Select a Curve**: Choose from a list of predefined mathematical curves.
 2.  **Place Points**: In each round `n`, you will place `n` points on the curve.
 3.  **Maximize Length**: The objective is to make the sum of the straight-line distances between your points as large as possible.
-4.  **Scoring**: Your score for each round is the difference between your path's length and the true arc length of the curve.
-5.  **Win**: Achieve the highest possible total score across 10 rounds.
+4.  **Scoring**: Your score for each round is the difference between the true arc length of the curve and your path's length.
+5.  **Win**: Achieve the lowest possible total score across 10 rounds.
 
 ## Running the Project
 

@@ -23,14 +23,14 @@ The game is played over 10 rounds. The other player is the "Point Placer".
 2.  Using a different colored marker, draw straight lines connecting the **start point -> the new dot -> the end point**.
 3.  Use the standard ruler to measure the length of these two straight lines.
 4.  Add the lengths together. This is your approximated length, `ΣL`.
-5.  Your score for Round 1 is `ΣL - S` (The Curve Drawer can now reveal S).
+5.  Your score for Round 1 is `S - ΣL` (The Curve Drawer can now reveal S).
 
 ### Round 2
 1.  Erase the dot and lines from Round 1.
 2.  The Point Placer must now place **two dots** anywhere on the curve.
 3.  Draw straight lines connecting the points in order: **start -> dot 1 -> dot 2 -> end**.
 4.  Measure the total length of these three straight lines to get the new `ΣL`.
-5.  Calculate the score for Round 2: `ΣL - S`.
+5.  Calculate the score for Round 2: `S - ΣL`.
 
 ### Subsequent Rounds
 - For each round `n`, the Point Placer places `n` dots on the curve.
@@ -38,4 +38,4 @@ The game is played over 10 rounds. The other player is the "Point Placer".
 - The total score is the sum of the scores from all 10 rounds.
 
 ### Objective
-The goal is to place the points in such a way that the total length of the straight-line segments is as large as possible, maximizing your score. This often means placing points at the outermost parts of the curve's bends.
+The goal is to place the points in such a way that the total length of the straight-line segments is as large as possible, minimizing your score.
