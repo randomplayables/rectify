@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Curve, Point, RoundData } from '../types';
+import { Curve, PlacedPoint, RoundData } from '../types';
 import { PRESET_CURVES } from '../utils/curves';
 import { calculateArcLength, calculatePathLength } from '../utils/math';
 import { initGameSession, saveGameData } from '../services/apiService';
@@ -10,7 +10,7 @@ export const useRectifyGame = () => {
   const [gameStarted, setGameStarted] = useState(false);
   const [round, setRound] = useState(1);
   const [selectedCurve, setSelectedCurve] = useState<Curve | null>(null);
-  const [placedPoints, setPlacedPoints] = useState<Point[]>([]);
+  const [placedPoints, setPlacedPoints] = useState<PlacedPoint[]>([]);
   const [actualLength, setActualLength] = useState(0);
   const [approximatedLength, setApproximatedLength] = useState(0);
   const [totalScore, setTotalScore] = useState(0);
@@ -36,15 +36,23 @@ export const useRectifyGame = () => {
     resetRound(curve);
   }, []);
 
-  const placePoint = (point: Point) => {
+  const placePoint = (point: PlacedPoint) => {
     if (isRoundFinished) return;
 
     setPlacedPoints(prevPoints => {
-      const newPoints = [...prevPoints, point].sort((a, b) => a.x - b.x);
+      const newPoints = [...prevPoints, point].sort((a, b) => a.t - b.t);
       
       if (selectedCurve) {
-          const endPoints = [selectedCurve.func(selectedCurve.t_min), selectedCurve.func(selectedCurve.t_max)].sort((a,b) => a.x - b.x);
-          const fullPath = [endPoints[0], ...newPoints, endPoints[1]];
+          const startPoint = selectedCurve.func(selectedCurve.t_min);
+          const endPoint = selectedCurve.func(selectedCurve.t_max);
+
+          // Check if the curve is closed by comparing start and end points
+          const isClosed = Math.hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y) < 1e-9;
+          
+          const fullPath = isClosed
+            ? [startPoint, ...newPoints, startPoint] // For closed: start -> p1...pn -> start
+            : [startPoint, ...newPoints, endPoint];  // For open:   start -> p1...pn -> end
+
           const pathLength = calculatePathLength(fullPath);
           setApproximatedLength(pathLength);
       }

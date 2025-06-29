@@ -1,10 +1,10 @@
 import React, { useRef, useEffect, useCallback } from 'react';
-import { Curve, Point } from '../types';
+import { Curve, Point, PlacedPoint } from '../types';
 
 interface CurveCanvasProps {
   curve: Curve;
-  placedPoints: Point[];
-  onPlacePoint: (point: Point) => void;
+  placedPoints: PlacedPoint[];
+  onPlacePoint: (point: PlacedPoint) => void;
   width?: number;
   height?: number;
 }
@@ -22,12 +22,12 @@ const CurveCanvas: React.FC<CurveCanvasProps> = ({ curve, placedPoints, onPlaceP
     };
   }, []);
 
-  const findClosestPointOnCurve = useCallback((clickPoint: Point, scaleFactor: Point, offset: Point): Point => {
+  const findClosestPointOnCurve = useCallback((clickPoint: Point, scaleFactor: Point, offset: Point): PlacedPoint => {
       let closestT = curve.t_min;
       let minDistance = Infinity;
 
       // Search for the closest point on the curve to the click location
-      for(let t = curve.t_min; t <= curve.t_max; t += 0.01){
+      for(let t = curve.t_min; t <= curve.t_max; t += 0.001){
           const p = curve.func(t);
           const canvasP = { x: p.x * scaleFactor.x + offset.x, y: -p.y * scaleFactor.y + offset.y };
           const d = Math.sqrt(Math.pow(canvasP.x - clickPoint.x, 2) + Math.pow(canvasP.y - clickPoint.y, 2));
@@ -37,7 +37,8 @@ const CurveCanvas: React.FC<CurveCanvasProps> = ({ curve, placedPoints, onPlaceP
               closestT = t;
           }
       }
-      return curve.func(closestT);
+      const finalPoint = curve.func(closestT);
+      return { ...finalPoint, t: closestT };
   }, [curve]);
 
   const draw = useCallback(() => {
@@ -81,21 +82,25 @@ const CurveCanvas: React.FC<CurveCanvasProps> = ({ curve, placedPoints, onPlaceP
     }
     ctx.stroke();
 
-    const allPoints = [
-        curve.func(curve.t_min),
-        ...placedPoints,
-        curve.func(curve.t_max)
-    ];
+    const startPoint = curve.func(curve.t_min);
+    const endPoint = curve.func(curve.t_max);
+    const isClosed = Math.hypot(endPoint.x - startPoint.x, endPoint.y - startPoint.y) < 1e-9;
+
+    const allPoints = isClosed
+        ? [startPoint, ...placedPoints, startPoint]
+        : [startPoint, ...placedPoints, endPoint];
 
 
     // Draw lines
     ctx.beginPath();
     ctx.strokeStyle = '#10B981'; // Green for the path lines
     ctx.lineWidth = 3;
-    const firstSegPoint = allPoints[0];
-    ctx.moveTo(firstSegPoint.x * scaleFactor.x + offset.x, -firstSegPoint.y * scaleFactor.y + offset.y);
-    for(const p of allPoints) {
-         ctx.lineTo(p.x * scaleFactor.x + offset.x, -p.y * scaleFactor.y + offset.y);
+    if (allPoints.length > 0) {
+        const firstSegPoint = allPoints[0];
+        ctx.moveTo(firstSegPoint.x * scaleFactor.x + offset.x, -firstSegPoint.y * scaleFactor.y + offset.y);
+        for(const p of allPoints) {
+            ctx.lineTo(p.x * scaleFactor.x + offset.x, -p.y * scaleFactor.y + offset.y);
+        }
     }
     ctx.stroke();
 
