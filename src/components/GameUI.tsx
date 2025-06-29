@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRectifyGame } from '../hooks/useRectifyGame';
 import CurveCanvas from './CurveCanvas';
 import ScoreDisplay from './ScoreDisplay';
+import CustomCurveForm from './CustomCurveForm';
+import { Curve } from '../types';
 
 const GameUI: React.FC = () => {
   const {
@@ -21,6 +23,13 @@ const GameUI: React.FC = () => {
     restartGame,
     presetCurves,
   } = useRectifyGame();
+
+  const [showCustomForm, setShowCustomForm] = useState(false);
+
+  const handleStartCustomGame = (curve: Curve) => {
+    startGame(curve);
+    setShowCustomForm(false);
+  };
 
   if (isGameOver) {
     return (
@@ -42,22 +51,37 @@ const GameUI: React.FC = () => {
 
   if (!gameStarted || !selectedCurve) {
     return (
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-2">Rectify</h1>
-        <p className="text-lg text-gray-400 mb-8">Place points on a curve to make the longest possible path.</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {presetCurves.map((curve) => (
+      <>
+        <div className="text-center">
+          <h1 className="text-4xl font-bold mb-2">Rectify</h1>
+          <p className="text-lg text-gray-400 mb-8">Place points on a curve to make the longest possible path.</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {presetCurves.map((curve) => (
+              <button
+                key={curve.name}
+                onClick={() => startGame(curve)}
+                className="bg-gray-800 hover:bg-emerald-700 border border-gray-700 text-white font-bold py-4 px-6 rounded-lg transition"
+              >
+                <h3 className="text-xl">{curve.name}</h3>
+                <p className="text-sm font-normal text-gray-400 mt-1">{curve.description}</p>
+              </button>
+            ))}
             <button
-              key={curve.name}
-              onClick={() => startGame(curve)}
-              className="bg-gray-800 hover:bg-emerald-700 border border-gray-700 text-white font-bold py-4 px-6 rounded-lg transition"
+              onClick={() => setShowCustomForm(true)}
+              className="bg-gray-800 hover:bg-emerald-700 border border-gray-700 text-white font-bold py-4 px-6 rounded-lg transition md:col-span-1 lg:col-span-1"
             >
-              <h3 className="text-xl">{curve.name}</h3>
-              <p className="text-sm font-normal text-gray-400 mt-1">{curve.description}</p>
+                <h3 className="text-xl">Create Custom Curve</h3>
+                <p className="text-sm font-normal text-gray-400 mt-1">Define your own curve with a formula.</p>
             </button>
-          ))}
+          </div>
         </div>
-      </div>
+        {showCustomForm && (
+            <CustomCurveForm 
+                onStartGame={handleStartCustomGame} 
+                onCancel={() => setShowCustomForm(false)}
+            />
+        )}
+      </>
     );
   }
 
